@@ -5,5 +5,5 @@ This course includes a large range of different fields regarding "Computer Scien
 * Data analytics
 * Data mining
 * Machine learning
-* Frontend, backend, and database
+* Web Development: Frontend, backend, and database
 * Image & Audio processing
