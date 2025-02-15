@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+        var currentTrial = 1;
+        var startTrialTime = 0;
+        var trialRunning = false;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('submitButton').style.display = 'none';
+
+            document.addEventListener("keyup", function(e) {
+                if (e.which === 32) {
+                    StartTrial();
+                } // space
+                if (e.which === 83) {
+                    PressedSame();
+                } // s
+                if (e.which === 68) {
+                    PressedDifferent();
+                } // d
+            });
+        });
+
+        function PressedSame() {
+            if (!trialRunning) {
+                return;
+            }
+            document.getElementById('t' + currentTrial + '_response').value = "same";
+            NextTrial();
+        }
+
+        function PressedDifferent() {
+            if (!trialRunning) {
+                return;
+            }
+            document.getElementById('t' + currentTrial + '_response').value = "diff";
+            NextTrial();
+        }
+
+        function NextTrial() {
+            trialRunning = false;
+
+            var currentTime = new Date().getTime();
+            var RT = currentTime - startTrialTime;
+            document.getElementById('t' + currentTrial + '_rt').value = RT;
+
+            var correctAnswer = 'd';
+
+            if (currentTrial == 3) correctAnswer = 's';
+
+            var participantAnswer = document.getElementById('t' + currentTrial + '_response').value;
+
+            // Call the function to record the data
+            recordData(currentTrial, correctAnswer, participantAnswer);
+
+            document.getElementById('t' + currentTrial + '_d2').style.display = 'none';
+            document.getElementById('startTrial').style.display = 'block';
+            currentTrial++;
+
+            if (currentTrial == 4) {
+                document.getElementById('submitButton').style.display = 'block';
+            }
+        }
+
+        function StartTrial() {
+            if (trialRunning) {
+                return;
+            }
+            trialRunning = true;
+
+            document.getElementById('startTrial').style.display = 'none';
+            document.getElementById('t' + currentTrial + '_d1').style.display = 'block';
+
+            setTimeout(function() {
+                document.getElementById('t' + currentTrial + '_d1').style.display = 'none';
+            }, 1000);
+
+            setTimeout(function() {
+                document.getElementById('t' + currentTrial + '_d2').style.display = 'block';
+                startTrialTime = new Date().getTime();
+            }, 1500);
+        }
+
+        function recordData(trial, correctAnswer, participantAnswer) {
+            fetch('/recordData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        trial,
+                        correctAnswer,
+                        participantAnswer
+                    }),
+                })
+                .then(response => response.text())
+                .then(message => console.log(message))
+                .catch(error => console.error(error));
+        }
+    </script>
+
+    <style>
+        #container {
+            position: relative;
+            background: gray;
+            width: 320px;
+            height: 240px;
+            margin: 30px;
+        }
+        
+        .displays {
+            position: absolute;
+            display: none;
+            top: 0px;
+            left: 0px;
+        }
+        
+        #startTrial {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            font-weight: bold;
+            color: white;
+            font-size: 14pt;
+        }
+    </style>
+
+    <h3>Remember the colors</h3>
+
+    You'll see several colored squares flashed briefly. Remember their colors. After a delay, you'll see a new set of colored squares. Either they will all be the same as before or one will have changed color. Press the spacebar to start each trial.
+
+    <div id="container">
+        <a href="javascript:StartTrial()" id="startTrial">Start Trial</a>
+    </div>
+</head>
+
+<body>
+    <script>
+        for (var i = 1; i <= 3; i++) {
+            var container = document.getElementById('container');
+            var d1 = document.createElement('img');
+            d1.className = 'displays';
+            d1.id = 't' + i + '_d1';
+            d1.src = i + '_display1.png';
+            container.appendChild(d1);
+
+            var d2 = document.createElement('img');
+            d2.className = 'displays';
+            d2.id = 't' + i + '_d2';
+            d2.src = i + '_display2.png';
+            container.appendChild(d2);
+
+            var responseInput = document.createElement('input');
+            responseInput.type = 'hidden';
+            responseInput.id = 't' + i + '_response';
+            responseInput.name = 't' + i + '_response';
+            responseInput.value = '';
+            container.appendChild(responseInput);
+
+            var rtInput = document.createElement('input');
+            rtInput.type = 'hidden';
+            rtInput.id = 't' + i + '_rt';
+            rtInput.name = 't' + i + '_rt';
+            rtInput.value = '';
+            container.appendChild(rtInput);
+        }
+    </script>
+
+    Press 's' if the two displays are the same. Press 'd' if a color changed (different).<br>
+
+    <input type="submit" id="submitButton" name="submitButton">
+</body>
+
+</html>

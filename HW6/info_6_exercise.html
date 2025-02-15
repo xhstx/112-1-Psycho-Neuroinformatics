@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gender Identification</title>
+</head>
+
+<body>
+    Please indicate the sex of this face:
+
+    <div class="page" id="page1" data-correct='F'>
+        <img src="1.jpg"><br>
+        <input type="radio" name="f1" value="M" onclick="GetResponseM()"> M
+        <input type="radio" name="f1" value="F" onclick="GetResponseF()"> F <br>
+        <a href="javascript:NextTrial()">Next</a>
+        <span class="progress"></span>
+    </div>
+
+    <div class="page" id="page2" data-correct='M'>
+        <img src="2.jpg"><br>
+        <input type="radio" name="f2" value="M" onclick="GetResponseM()"> M
+        <input type="radio" name="f2" value="F" onclick="GetResponseF()"> F <br>
+        <a href="javascript:NextTrial()">Next</a>
+        <span class="progress"></span>
+    </div>
+
+    <div class="page" id="page3" data-correct='F'>
+        <img src="3.jpg"><br>
+        <input type="radio" name="f3" value="M" onclick="GetResponseM()"> M
+        <input type="radio" name="f3" value="F" onclick="GetResponseF()"> F <br>
+        <a href="javascript:NextTrial()">Next</a>
+        <span class="progress"></span>
+    </div>
+
+    <div class="page" id="page4">
+        <h3>All done! Thanks!</h3>
+        <p></p>
+    </div>
+
+    <script>
+        var order = [1, 2, 3];
+        var current = 0;
+        var correct = 0;
+        var accuracy = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Shuffle the order array
+            shuffleArray(order);
+            ShowTrial(current);
+        });
+
+        function shuffleArray(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+
+        function ShowTrial(t) {
+            // Hide all trials
+            document.querySelectorAll('.page').forEach(function(page) {
+                page.style.display = 'none';
+            });
+            // Show the current trial
+            document.querySelector('#page' + order[t]).style.display = 'block';
+            N = t + 1;
+            [...document.querySelectorAll('.progress')]
+            .map(x => {
+                x.textContent = `(${N}/${order.length})`;
+            });
+        }
+
+        function NextTrial() {
+            if (current < order.length - 1) {
+                current++;
+                ShowTrial(current);
+            } else {
+                document.querySelectorAll('.page').forEach(function(page) {
+                    page.style.display = 'none';
+                });
+                ShowResult();
+                document.querySelector('#page4').style.display = 'block';
+            }
+        }
+
+        function GetResponseM() {
+            var currentTrial = document.getElementById('page' + order[current]);
+            var correctAnswer = currentTrial.getAttribute("data-correct");
+            if (correctAnswer === 'M') correct++;
+        }
+
+        function GetResponseF() {
+            var currentTrial = document.getElementById('page' + order[current]);
+            var correctAnswer = currentTrial.getAttribute("data-correct");
+            if (correctAnswer === 'F') correct++;
+        }
+
+        function ShowResult() {
+            accuracy = (correct / order.length) * 100;
+            accuracy = accuracy.toFixed(2);
+            document.querySelector('#page4 p').textContent = "Accuracy: " + accuracy + "%";
+        }
+    </script>
+</body>
+
+</html>
